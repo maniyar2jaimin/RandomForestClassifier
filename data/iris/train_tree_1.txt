@@ -1,0 +1,19 @@
+
+highest accuracy = 0.9033333333333333, best threshhold = 0.0
+
+petalwidth <= 0.5 [Iris-setosa] out of {Iris-setosax31}
+petalwidth > 0.5
+|----petallength <= 4.7
+|----|----petalwidth <= 1.6 [Iris-versicolor] out of {Iris-versicolorx24}
+|----|----petalwidth > 1.6 [Iris-virginica] out of {Iris-virginicax1}
+|----petallength > 4.7
+|----|----petalwidth <= 1.8
+|----|----|----petallength <= 5.1
+|----|----|----|----sepallength <= 6.1
+|----|----|----|----|----sepallength <= 5.9 [Iris-versicolor] out of {Iris-versicolorx1}
+|----|----|----|----|----sepallength > 5.9
+|----|----|----|----|----|----petallength <= 5.0 [Iris-virginica] out of {Iris-virginicax3}
+|----|----|----|----|----|----petallength > 5.0 [Iris-versicolor] out of {Iris-versicolorx1}
+|----|----|----|----sepallength > 6.1 [Iris-versicolor] out of {Iris-versicolorx2}
+|----|----|----petallength > 5.1 [Iris-virginica] out of {Iris-virginicax4}
+|----|----petalwidth > 1.8 [Iris-virginica] out of {Iris-virginicax16}

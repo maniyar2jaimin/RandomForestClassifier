@@ -1,0 +1,5 @@
+@attribute sepallength	real
+@attribute sepalwidth 	real
+@attribute petallength 	real
+@attribute petalwidth	real
+@attribute label {Iris-setosa,Iris-versicolor,Iris-virginica}
