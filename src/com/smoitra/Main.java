@@ -8,8 +8,7 @@ public class Main {
         String dataFile = "/home/smoitra/IdeaProjects/MyRandomForest/data/iris/train.txt";
         String testFile = "/home/smoitra/IdeaProjects/MyRandomForest/data/iris/test.txt";
         String attribFile = "/home/smoitra/IdeaProjects/MyRandomForest/data/iris/attribute.txt";
-        Forest f1 = new Forest(5, dataFile, attribFile);
-
+        Forest f1 = new Forest(100, dataFile, attribFile);
         HashMap predictions = f1.getPrediction(testFile, attribFile);
         Iterator<Map.Entry<Record, String>> iterator = predictions.entrySet().iterator() ;
         while(iterator.hasNext()){

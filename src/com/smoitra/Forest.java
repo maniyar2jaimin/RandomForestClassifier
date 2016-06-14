@@ -1,6 +1,7 @@
 package com.smoitra;
 
 import java.util.*;
+import org.apache.commons.collections4.ListUtils;
 
 /**
  * Created by smoitra on 8/6/16.
@@ -10,6 +11,7 @@ public class Forest {
     private ArrayList<Tree> trees;
     private List<Record> allData;
     private ArrayList<Attribute> attributes;
+    private HashMap accuracy;
 
 
     /**
@@ -40,7 +42,7 @@ public class Forest {
      * @return List of choosen records
      */
     public List<Record> pickNRandomRecords(List<Record> records) {
-        int n = (int) (records.size() * 0.66);
+        int n = (int) (records.size() * 0.90);
         List<Record> list = new ArrayList<Record>(records.size());
         for (Record i : records) {
             list.add(i);
@@ -73,11 +75,21 @@ public class Forest {
         this.attributes = LoadData.attributes;
 
 
-        System.out.println("Creating trees by picking randomly 66% from training data");
+        System.out.println("Creating trees by picking randomly 90% from training data");
+        System.out.println();
+        accuracy = new HashMap<Tree, Double>();
         for(int i = 0; i < noTrees; i++) {
-            Tree tree =  createTreeWithAttributes(pickNRandomRecords(allData),filename, i);
+            List<Record> training_sample = pickNRandomRecords(allData);
+            List<Record> testing_sample = ListUtils.subtract(allData, training_sample);
+            Tree tree =  createTreeWithAttributes(training_sample,filename, i);
+            double trainingAccuracy = tree.doValidations(training_sample);
+            double testingAccuracy = tree.doValidations(testing_sample);
+            accuracy.put(tree, testingAccuracy);
+            System.out.printf("Training accuracy of tree %d is %.2f\n", i, trainingAccuracy);
+            System.out.printf("Testing accuracy of tree %d is %.2f\n", i, testingAccuracy);
             this.trees.add(tree);
         }
+        System.out.println();
     }
 
     /**
@@ -92,13 +104,14 @@ public class Forest {
         List<Record> testData = LoadData.allData;
         HashMap predictions = new HashMap<Record, String>();
 
+
         int success = 0;
         int failure = 0;
 
         for(Record rec : testData) {
             ArrayList<String> stringlist = new ArrayList<String>();
-            for(Tree tr : trees) {
-                String pre = tr.getRoot().getPrediction(alter_record(rec, tr.selected_attribs));
+            for(Tree tr : getBestTrees()) {
+                String pre = tr.getRoot().getPrediction(Tree.alter_record(rec, tr.selected_attribs));
                 stringlist.add(pre);
 
             }
@@ -156,7 +169,7 @@ public class Forest {
         int[] attribute_positions = pickNRandomAttribute(no_of_attribs);
 
         for(Record i : records) {
-            new_records.add(alter_record(i, attribute_positions));
+            new_records.add(Tree.alter_record(i, attribute_positions));
         }
         ArrayList<Attribute> new_attribs_list = new ArrayList<Attribute>();
         for(int i : attribute_positions) {
@@ -169,20 +182,43 @@ public class Forest {
         return tree;
     }
 
-    /**
-     * Selects attributes from supplied attributes array
-     * @param record
-     * @param selected_attribs
-     * @return
-     */
-    public Record alter_record(Record record, int[] selected_attribs) {
-        String[] str = new String[selected_attribs.length + 1];
-        Record new_rec = new Record();
-        for (int j = 0; j < selected_attribs.length; j++ ) {
-            str[j] = record.getValue(selected_attribs[j]);
+    public ArrayList<Tree> getBestTrees() {
+        ArrayList<Tree> bestTrees = new ArrayList<Tree>();
+
+        Map<Tree, Double> treeMap = sortByComparator(accuracy);
+        for(Map.Entry<Tree, Double> i: treeMap.entrySet()) {
+            if(bestTrees.size() > trees.size() / 2)
+                break;
+            bestTrees.add(i.getKey());
+//            System.out.println("Tree Key " + i.getKey() + " tree value " + i.getValue());
         }
-        str[selected_attribs.length] = record.getValue(this.attributes.size() - 1 );
-        new_rec.setAttribute(str);
-        return new_rec;
+
+        return bestTrees;
+    }
+
+    /**
+     * Sorting a Map of accuracy
+     * @param unsortMap
+     * @return Map<Tree, Double>
+     */
+    private static Map<Tree, Double> sortByComparator(Map<Tree, Double> unsortMap) {
+
+        // Convert Map to List
+        List<Map.Entry<Tree, Double>> list = new LinkedList<Map.Entry<Tree, Double>>(unsortMap.entrySet());
+
+        // Sort list with comparator, to compare the Map values
+        Collections.sort(list, new Comparator<Map.Entry<Tree, Double>>() {
+            public int compare(Map.Entry<Tree, Double> o1,
+                               Map.Entry<Tree, Double> o2) {
+                return (o2.getValue()).compareTo(o1.getValue());
+            }
+        });
+
+        Map<Tree, Double> sortedMap = new LinkedHashMap<Tree, Double>();
+        for (Iterator<Map.Entry<Tree, Double>> it = list.iterator(); it.hasNext();) {
+            Map.Entry<Tree, Double> entry = it.next();
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+        return sortedMap;
     }
 }

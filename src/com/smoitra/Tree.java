@@ -505,4 +505,36 @@ public class Tree {
 	public TreeNode getRoot() {
 		return this.root;
 	}
+
+	/**
+	 * Selects attributes from supplied attributes array
+	 * @param record
+	 * @param selected_attribs
+	 * @return
+	 */
+	public static Record alter_record(Record record, int[] selected_attribs) {
+		String[] str = new String[selected_attribs.length + 1];
+		Record new_rec = new Record();
+		for (int j = 0; j < selected_attribs.length; j++ ) {
+			str[j] = record.getValue(selected_attribs[j]);
+		}
+		str[selected_attribs.length] = record.getValue(record.getValues().size() - 1 );
+		new_rec.setAttribute(str);
+		return new_rec;
+	}
+
+	public double doValidations(List<Record> testingData) {
+		int success = 0;
+		int failure = 0;
+		for(Record rec : testingData) {
+			String pre = this.getRoot().getPrediction(alter_record(rec, this.selected_attribs));
+			String original_classification = rec.getValue(rec.getValues().size() - 1);
+			if (pre.matches(original_classification)) {
+				success++;
+			} else {
+				failure++;
+			}
+		}
+		return ((double) success / (double)(success + failure) ) * 100.00;
+	}
 }
