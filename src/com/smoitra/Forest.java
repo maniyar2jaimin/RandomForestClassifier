@@ -11,8 +11,10 @@ public class Forest {
     private ArrayList<Tree> trees;
     private List<Record> allData;
     private ArrayList<Attribute> attributes;
+    private List<Record> trainingSample;
+    private List<Record> testingSample;
     private HashMap accuracy;
-
+    private HashMap predictions;
 
     /**
      * Selects Attribute postions randomly
@@ -62,31 +64,19 @@ public class Forest {
      * @param filename Training data set file absolute path
      * @param attrib_file Atrributes description file absolute path
      */
-    public Forest(int noTrees, String filename, String attrib_file) {
-        System.out.println("=====================================================================");
-        System.out.println("Developed by : ");
-        System.out.println("\t 1. Joyeeta Roy");
-        System.out.println("\t 2. Neel Kusum Ekka");
-        System.out.println("\t 2. Sourav Moitra");
-        System.out.println("Creating Forest of " + noTrees + " trees.");
-        LoadData.loadAllData(filename, attrib_file);
+    public Forest(int noTrees, String filename, List<Record> allData, ArrayList<Attribute> attributes) {
         trees = new ArrayList<Tree>();
-        this.allData = LoadData.allData;
-        this.attributes = LoadData.attributes;
 
-
-        System.out.println("Creating trees by picking randomly 90% from training data");
+        this.attributes = attributes;
+        this.trainingSample = allData;
+//        this.testingSample = ListUtils.subtract(allData, trainingSample);
         System.out.println();
         accuracy = new HashMap<Tree, Double>();
         for(int i = 0; i < noTrees; i++) {
-            List<Record> training_sample = pickNRandomRecords(allData);
-            List<Record> testing_sample = ListUtils.subtract(allData, training_sample);
+            List<Record> training_sample = trainingSample;
             Tree tree =  createTreeWithAttributes(training_sample,filename, i);
             double trainingAccuracy = tree.doValidations(training_sample);
-            double testingAccuracy = tree.doValidations(testing_sample);
-            accuracy.put(tree, testingAccuracy);
             System.out.printf("Training accuracy of tree %d is %.2f\n", i, trainingAccuracy);
-            System.out.printf("Testing accuracy of tree %d is %.2f\n", i, testingAccuracy);
             this.trees.add(tree);
         }
         System.out.println();
@@ -98,10 +88,9 @@ public class Forest {
      * @param attrib_file Attribute description file path
      * @return HashMap of predictions
      */
-    public HashMap getPrediction(String filename, String attrib_file) {
-        System.out.println("We are trying to do predictions");
-        LoadData.loadAllData(filename, attrib_file);
-        List<Record> testData = LoadData.allData;
+    public double getPrediction(List<Record> testData) {
+        System.out.println("We are trying to do predisctions");
+//        List<Record> testData = testData;
         HashMap predictions = new HashMap<Record, String>();
 
 
@@ -110,7 +99,9 @@ public class Forest {
 
         for(Record rec : testData) {
             ArrayList<String> stringlist = new ArrayList<String>();
-            for(Tree tr : getBestTrees()) {
+//            ArrayList<Tree> bestTrees = getBestTrees();
+            ArrayList<Tree> bestTrees = this.trees;
+            for(Tree tr : bestTrees) {
                 String pre = tr.getRoot().getPrediction(Tree.alter_record(rec, tr.selected_attribs));
                 stringlist.add(pre);
 
@@ -118,18 +109,19 @@ public class Forest {
             String result = getPopularElement(stringlist);
             String original_classification = rec.getValue(rec.getValues().size() - 1);
             if (original_classification.matches(result)) {
-                predictions.put(rec, "Success");
+                predictions.put(rec, result + " , Success");
                 success++;
             } else {
-                predictions.put(rec, "Failure");
+                predictions.put(rec, result + " , Failure");
                 failure++;
             }
-
         }
+        this.predictions = predictions;
         double success_rate = ((double) success / (double)(success + failure) ) * 100.00;
         System.out.println("Predictions complete");
         System.out.printf("Successfully predicted %.2f percent of the cases\n", success_rate);
-        return predictions;
+        System.out.println("\n\n");
+        return success_rate;
     }
 
     /**
