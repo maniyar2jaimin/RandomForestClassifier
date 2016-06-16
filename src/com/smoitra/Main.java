@@ -1,5 +1,6 @@
 package com.smoitra;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class Main {
@@ -9,7 +10,7 @@ public class Main {
     private static List<Record> allData;
     private static ArrayList<Attribute> attributes;
 
-    public static void crossValidation(int k, String filename, String attrib_file) {
+    public static double crossValidation(int k, String filename, String attrib_file) {
 
         System.out.println("Creating Forest of " + k + " trees.");
         LoadData.loadAllData(filename, attrib_file);
@@ -29,7 +30,8 @@ public class Main {
             kgroup.get((i % k)).add(i);
         }
 
-        double[] myAccuracy = new double[10];
+        double[] myAccuracy = new double[k];
+        double[] myAccuracy2 = new double[k];
         double sum = 0.0;
         for (int i = 0; i < k; i++) {
             testData.clear();
@@ -43,8 +45,8 @@ public class Main {
             }
             myTestingSamples.clear();
             myTrainingSamples.clear();
-            System.out.println(trainingData);
-            System.out.println(testData);
+//            System.out.println(trainingData);
+//            System.out.println(testData);
 
 
             for(Integer trd : trainingData) {
@@ -59,25 +61,52 @@ public class Main {
 
             Forest forest = new Forest(10, filename, myTrainingSamples, attributes);
 
-            double accuracy = forest.getPrediction(myTestingSamples);
+            double training_accuracy = forest.getPrediction(myTrainingSamples);
+            double testing_accuracy = forest.getPrediction(myTestingSamples);
 
-            myAccuracy[i] =  accuracy;
+            myAccuracy[i] =  testing_accuracy;
+            myAccuracy2[i] =  training_accuracy;
         }
 
+        for (Double myacr : myAccuracy2) {
+            sum +=  myacr;
+        }
+
+//        System.out.println("Average training accuracy of 10 runs is " + sum / k);
+
+        sum = 0;
         for (Double myacr : myAccuracy) {
             sum +=  myacr;
         }
 
-        System.out.println("Average acuracy of the 10 fold trees is " + sum / k);
+//        System.out.println("Average testing accuracy of 10 runs is " + sum / k);
+
+        return sum / k;
+    }
+
+    public static void runTenTimes(int k, String filename, String attrib_file) {
+        double[] accuracy = new double[10];
+        double sum = 0.0;
+        for (int i = 0; i < 10 ; i ++) {
+            double temp;
+            temp = crossValidation(k, filename, attrib_file);
+            accuracy[i] = temp;
+            sum += temp;
+        }
+        Arrays.sort(accuracy);
+        System.out.println("===================================================================");
+        System.out.printf("Maximum testing accuracy of 10 runs is:\t %.2f\n", accuracy[9]);
+        System.out.printf("Average testing accuracy of 10 runs is:\t %.2f\n", sum / 10);
+        System.out.printf("Minimum testing accuracy of 10 runs is:\t %.2f\n", accuracy[0]);
+        System.out.println("===================================================================");
     }
 
 	public static void main(String[] args) {
         String dataFile = "/home/smoitra/IdeaProjects/MyRandomForest/data/iris/train.txt";
-        String testFile = "/home/smoitra/IdeaProjects/MyRandomForest/data/iris/test.txt";
         String attribFile = "/home/smoitra/IdeaProjects/MyRandomForest/data/iris/attribute.txt";
         int no_of_forest = 10;
 
-        crossValidation(10, dataFile, attribFile);
+        runTenTimes(no_of_forest, dataFile, attribFile);
 
     }
 }

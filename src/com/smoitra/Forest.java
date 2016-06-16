@@ -76,7 +76,8 @@ public class Forest {
             List<Record> training_sample = trainingSample;
             Tree tree =  createTreeWithAttributes(training_sample,filename, i);
             double trainingAccuracy = tree.doValidations(training_sample);
-            System.out.printf("Training accuracy of tree %d is %.2f\n", i, trainingAccuracy);
+//            System.out.printf("Training accuracy of tree %d is %.2f\n", i, trainingAccuracy);
+            accuracy.put(tree, trainingAccuracy);
             this.trees.add(tree);
         }
         System.out.println();
@@ -89,7 +90,7 @@ public class Forest {
      * @return HashMap of predictions
      */
     public double getPrediction(List<Record> testData) {
-        System.out.println("We are trying to do predisctions");
+        System.out.println("We are trying to do predictions");
 //        List<Record> testData = testData;
         HashMap predictions = new HashMap<Record, String>();
 
@@ -99,8 +100,8 @@ public class Forest {
 
         for(Record rec : testData) {
             ArrayList<String> stringlist = new ArrayList<String>();
-//            ArrayList<Tree> bestTrees = getBestTrees();
-            ArrayList<Tree> bestTrees = this.trees;
+            ArrayList<Tree> bestTrees = getBestTrees();
+//            ArrayList<Tree> bestTrees = this.trees;
             for(Tree tr : bestTrees) {
                 String pre = tr.getRoot().getPrediction(Tree.alter_record(rec, tr.selected_attribs));
                 stringlist.add(pre);
@@ -120,7 +121,7 @@ public class Forest {
         double success_rate = ((double) success / (double)(success + failure) ) * 100.00;
         System.out.println("Predictions complete");
         System.out.printf("Successfully predicted %.2f percent of the cases\n", success_rate);
-        System.out.println("\n\n");
+        System.out.println("\n");
         return success_rate;
     }
 
@@ -211,6 +212,7 @@ public class Forest {
             Map.Entry<Tree, Double> entry = it.next();
             sortedMap.put(entry.getKey(), entry.getValue());
         }
+//        System.out.println(sortedMap);
         return sortedMap;
     }
 }
