@@ -94,11 +94,11 @@ public class Main {
             sum += temp;
         }
         Arrays.sort(accuracy);
-        System.out.println("===================================================================");
+        System.out.println("============================================================");
         System.out.printf("Maximum testing accuracy of 10 runs is:\t %.2f\n", accuracy[9]);
         System.out.printf("Average testing accuracy of 10 runs is:\t %.2f\n", sum / 10);
         System.out.printf("Minimum testing accuracy of 10 runs is:\t %.2f\n", accuracy[0]);
-        System.out.println("===================================================================");
+        System.out.println("============================================================");
     }
 
 	public static void main(String[] args) {

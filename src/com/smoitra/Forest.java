@@ -100,8 +100,8 @@ public class Forest {
 
         for(Record rec : testData) {
             ArrayList<String> stringlist = new ArrayList<String>();
-            ArrayList<Tree> bestTrees = getBestTrees();
-//            ArrayList<Tree> bestTrees = this.trees;
+//            ArrayList<Tree> bestTrees = getBestTrees();
+            ArrayList<Tree> bestTrees = this.trees;
             for(Tree tr : bestTrees) {
                 String pre = tr.getRoot().getPrediction(Tree.alter_record(rec, tr.selected_attribs));
                 stringlist.add(pre);
